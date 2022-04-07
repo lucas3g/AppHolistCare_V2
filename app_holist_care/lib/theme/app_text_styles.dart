@@ -18,8 +18,8 @@ abstract class AppTextStyles {
 
 class AppTextStylesDefault implements AppTextStyles {
   @override
-  TextStyle get button =>
-      GoogleFonts.montserrat(fontSize: 14, color: AppTheme.colors.button);
+  TextStyle get button => GoogleFonts.montserrat(
+      fontSize: 14, color: AppTheme.colors.button, fontWeight: FontWeight.w600);
 
   @override
   TextStyle get title => GoogleFonts.montserrat(
