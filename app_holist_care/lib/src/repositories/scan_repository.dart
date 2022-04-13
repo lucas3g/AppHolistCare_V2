@@ -2,36 +2,34 @@ import 'package:app_holist_care/src/shared_preferences/token_shared_preferences.
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
-class LoginRepository {
-  Future<bool> login({required String token}) async {
+class ScanRepository {
+  Future<String> verifyNFT({required String nft}) async {
     try {
       Dio dio = Dio(
         BaseOptions(baseUrl: 'http://invites-api.genezys.io/api/invite'),
       );
 
+      final sharedPref = GetIt.I.get<TokenSharedPreferences>();
+
       final response = await dio.get(
-        '/checking/9XVeUqNkYJZaCuQQQbZwx1z3XtYXtKfiWKCkNrA4GzdD',
+        '/checking/$nft',
         options: Options(
           headers: {
-            'token': token,
+            'token': sharedPref.getToken(),
           },
         ),
       );
       if (response.statusCode == 200) {
-        return true;
+        if (response.data['status'] == 'accept') {
+          return 'ACCEPT';
+        } else {
+          return 'ALREADYUSED';
+        }
       } else {
-        return false;
+        return 'ERROR';
       }
     } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> removeLogin() async {
-    try {
-      return await GetIt.I.get<TokenSharedPreferences>().removeLogin();
-    } catch (e) {
-      return false;
+      return 'ERROR';
     }
   }
 }

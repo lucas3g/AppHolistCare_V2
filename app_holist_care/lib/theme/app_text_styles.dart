@@ -14,6 +14,7 @@ abstract class AppTextStyles {
   TextStyle get textoSairApp;
   TextStyle get textoCadastroSucesso;
   TextStyle get textoTermo;
+  TextStyle get textoSuccessoNFT;
 }
 
 class AppTextStylesDefault implements AppTextStyles {
@@ -64,8 +65,10 @@ class AppTextStylesDefault implements AppTextStyles {
       fontSize: 14, color: Colors.white, fontWeight: FontWeight.w700);
 
   @override
-  TextStyle get textoTermo => GoogleFonts.montserrat(
-        fontSize: 14,
-        color: Colors.black,
-      );
+  TextStyle get textoTermo =>
+      GoogleFonts.montserrat(fontSize: 14, color: Colors.black);
+
+  @override
+  TextStyle get textoSuccessoNFT => GoogleFonts.montserrat(
+      fontSize: 24, color: AppTheme.colors.button, fontWeight: FontWeight.w600);
 }

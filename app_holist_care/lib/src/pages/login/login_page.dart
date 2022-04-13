@@ -43,8 +43,7 @@ class _LoginPageState extends State<LoginPage> {
             (route) => false);
       } else if (state is LoginErrorState) {
         const snackBar = SnackBar(
-          content:
-              Text('Opss... Error ao tentar conectar-se. Tente novamente.'),
+          content: Text('Opss... Token inválido.'),
         );
 
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -55,7 +54,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void dispose() {
     sub.cancel();
-    bloc.close();
     super.dispose();
   }
 
@@ -93,6 +91,7 @@ class _LoginPageState extends State<LoginPage> {
               Form(
                 key: keyCode,
                 child: TextFormField(
+                  keyboardType: TextInputType.number,
                   validator: ((value) {
                     if (value!.isEmpty) {
                       return 'Código de acesso não pode ser vazio!';
@@ -139,7 +138,11 @@ class _LoginPageState extends State<LoginPage> {
                           return;
                         }
                         FocusScope.of(context).requestFocus(FocusNode());
-                        bloc.add(SignInEvent(code: controllerText.text));
+                        bloc.add(
+                          SignInEvent(
+                            token: controllerText.text,
+                          ),
+                        );
                       },
                       child: AnimatedContainer(
                         alignment: Alignment.center,
@@ -199,15 +202,23 @@ class _LoginPageState extends State<LoginPage> {
                                       ? CrossFadeState.showFirst
                                       : CrossFadeState.showSecond,
                                   duration: const Duration(milliseconds: 500),
-                                  firstChild: Center(
-                                    child: CircularProgressIndicator(
-                                      color: AppTheme.colors.button,
+                                  firstChild: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        color: AppTheme.colors.button,
+                                      ),
                                     ),
                                   ),
-                                  secondChild: Icon(
-                                    Icons.check_rounded,
-                                    color: AppTheme.colors.button,
-                                    size: 25,
+                                  secondChild: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.check_rounded,
+                                        color: AppTheme.colors.button,
+                                        size: 25,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

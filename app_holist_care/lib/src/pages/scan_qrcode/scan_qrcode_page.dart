@@ -1,6 +1,5 @@
-import 'dart:developer';
-import 'dart:io';
-
+import 'package:app_holist_care/src/pages/validate_nft/validate_nft_page.dart';
+import 'package:app_holist_care/src/repositories/login_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -14,40 +13,40 @@ class ScanNFT extends StatefulWidget {
 class _ScanNFTState extends State<ScanNFT> {
   Barcode? result;
   QRViewController? controller;
-  late bool success = false;
+  late String qrCode = '';
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller!.pauseCamera();
-    }
-    controller!.resumeCamera();
-  }
+  final LoginRepository loginRepository = LoginRepository();
 
   void _onQRViewCreated(QRViewController controller) {
     setState(() {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) async {
-      setState(() {
-        result = scanData;
-        success = true;
-      });
-      await Future.delayed(const Duration(seconds: 2));
-      setState(() {
-        result = null;
-        success = false;
-      });
+      if (scanData.code!.isNotEmpty && qrCode.isEmpty) {
+        qrCode = scanData.code!;
+        await sendCodeToServer();
+      }
     });
   }
 
+  Future<void> sendCodeToServer() async {
+    if (qrCode.isNotEmpty) {
+      await Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ValidateNFTPage(
+            qrCode: qrCode,
+          ),
+        ),
+      );
+      qrCode = '';
+    }
+  }
+
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
     if (!p) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
+        const SnackBar(content: Text('Permissão negada')),
       );
     }
   }
@@ -61,41 +60,40 @@ class _ScanNFTState extends State<ScanNFT> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            flex: 9,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-              overlay: QrScannerOverlayShape(
-                borderColor: Colors.red,
-                borderRadius: 10,
-                borderLength: 30,
-                borderWidth: 10,
-                cutOutHeight: 400,
-                cutOutWidth: 350,
-              ),
-              onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          QRView(
+            key: qrKey,
+            onQRViewCreated: _onQRViewCreated,
+            overlay: QrScannerOverlayShape(
+              borderColor: Colors.red,
+              borderRadius: 10,
+              borderLength: 30,
+              borderWidth: 10,
+              cutOutHeight: 400,
+              cutOutWidth: 350,
             ),
+            onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
           ),
-          Expanded(
-            flex: 1,
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    if (success)
-                      const Text('NFT Detectado')
-                    else
-                      const Text('Scanear NFT'),
-                  ],
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      if (await loginRepository.removeLogin()) {
+                        await Navigator.pushReplacementNamed(context, '/login');
+                      }
+                    },
+                    icon: const Icon(Icons.exit_to_app),
+                    label: const Text('Sair do app'),
+                  ),
                 ),
               ),
-            ),
+            ],
           )
         ],
       ),

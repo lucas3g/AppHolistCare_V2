@@ -1,9 +1,9 @@
 abstract class LoginEvents {}
 
 class SignInEvent extends LoginEvents {
-  final String code;
+  final String token;
 
   SignInEvent({
-    required this.code,
+    required this.token,
   });
 }
